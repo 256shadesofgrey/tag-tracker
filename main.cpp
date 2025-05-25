@@ -2,10 +2,9 @@
 #include <opencv2/opencv.hpp>
 
 int main(int argc, char *argv[]) {
-  std::string video_source = "";
+  std::string video_source = "http://192.168.178.10:8080/video";
 
   if (argc < 2) {
-    video_source = "http://192.168.178.10:8080/video";
     std::cout << "No video source was given. Using the default " << video_source
               << std::endl;
   } else {
