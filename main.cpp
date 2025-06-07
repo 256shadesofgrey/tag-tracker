@@ -21,8 +21,9 @@ int main(int argc, char *argv[]) {
   }
 
   cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
+  cv::namedWindow("Edge detection", cv::WINDOW_NORMAL);
 
-  cv::Mat frame;
+  cv::Mat frame, frame_blur, frame_canny;
 
   while (true) {
     cap >> frame;
@@ -33,6 +34,14 @@ int main(int argc, char *argv[]) {
     }
 
     cv::imshow("Camera Feed", frame);
+
+    // Blur image to reduce noise.
+    cv::GaussianBlur(frame, frame_blur, cv::Size(3, 3), 3, 0);
+
+    // Edge detection.
+    cv::Canny(frame_blur, frame_canny, 50, 150);
+
+    cv::imshow("Edge detection", frame_canny);
 
     // Wait for X milliseconds. If a key is pressed, break from the loop.
     if (cv::waitKey(1) >= 0)
