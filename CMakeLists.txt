@@ -18,7 +18,9 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(SOURCE_FILES main.cpp)
+set(GENERATE_TAGS_SOURCE_FILES generate_tags.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable("${PROJECT_NAME}-generate-tags" ${GENERATE_TAGS_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
