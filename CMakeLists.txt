@@ -24,3 +24,4 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_executable("${PROJECT_NAME}-generate-tags" ${GENERATE_TAGS_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries("${PROJECT_NAME}-generate-tags" ${OpenCV_LIBS})
