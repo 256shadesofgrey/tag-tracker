@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 
   int markerSize = 8;
   int imageSize = 200;
-  std::string baseFileName = "marker";
+  std::string prefix = "marker";
   std::vector<int> markerIds = {0};
   std::string path = "./output/";
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     ("id,i", po::value<std::vector<int>>(), std::format("List of IDs encoded in the marker. (Default: {})", vec2str(markerIds)).c_str())
     ("size,s", po::value<int>(), std::format("Size of the marker in squares per side. (Default: {})", markerSize).c_str())
     ("resolution,r", po::value<int>(), std::format("Size of the generated image in pixels per side. (Default: {})", imageSize).c_str())
-    ("prefix,p", po::value<std::string>(), std::format("File name prefix. (Default: {})", baseFileName).c_str())
+    ("prefix,p", po::value<std::string>(), std::format("File name prefix. (Default: {})", prefix).c_str())
     ("output,o", po::value<std::string>(), std::format("Output folder for the generated tags. (Default: {})", path).c_str())
   ;
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("prefix")) {
-    baseFileName = vm["prefix"].as<std::string>();
+    prefix = vm["prefix"].as<std::string>();
   }
 
   if (vm.count("output")) {
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Setting IDs to: " << vec2str(markerIds) << std::endl;
     std::cout << "Setting marker size to: " << markerSize << std::endl;
     std::cout << "Setting image size to: " << imageSize << std::endl;
-    std::cout << "Setting filename prefix to: " << baseFileName << std::endl;
+    std::cout << "Setting filename prefix to: " << prefix << std::endl;
     std::cout << "Setting output path to: " << path << std::endl;
   }
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
                                   markerImage, 1);
 
     // Create an SVG file
-    std::ofstream svgFile(path + "/" + baseFileName + std::to_string(markerIds[id]) + ".svg");
+    std::ofstream svgFile(path + "/" + prefix + std::to_string(markerIds[id]) + ".svg");
     svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" << imageSize
             << "\" height=\"" << imageSize << "\">";
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
     cv::Mat resizedMarkerImage;
     cv::resize(markerImage, resizedMarkerImage, cv::Size(imageSize, imageSize), 0,
               0, cv::INTER_NEAREST);
-    cv::imwrite(path + "/" + baseFileName + std::to_string(markerIds[id]) + ".png",
+    cv::imwrite(path + "/" + prefix + std::to_string(markerIds[id]) + ".png",
                 resizedMarkerImage);
   }
 
