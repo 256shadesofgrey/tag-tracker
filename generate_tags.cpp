@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("output")) {
-    path = std::filesystem::canonical(vm["output"].as<std::string>()).string();
+    path = std::filesystem::path(vm["output"].as<std::string>()).lexically_normal().string();
   }
 
   if (verbosity > 0) {
