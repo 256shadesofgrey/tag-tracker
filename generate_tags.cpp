@@ -37,9 +37,9 @@ int main(int argc, char *argv[]) {
     ("help,h", "Show this message.")
     ("verbose,v", "Display additional information.")
     ("id,i", po::value<std::vector<int>>(), std::format("List of IDs encoded in the marker. (Default: {})", vec2str(markerIds)).c_str())
-    ("size,s", po::value<int>(), "Size of the marker in squares per side. (Default: 8)")
-    ("resolution,r", po::value<int>(), "Size of the generated image in pixels per side. (Default: 200)")
-    ("prefix,p", po::value<std::string>(), "File name prefix. (Default: marker)")
+    ("size,s", po::value<int>(), std::format("Size of the marker in squares per side. (Default: {})", markerSize).c_str())
+    ("resolution,r", po::value<int>(), std::format("Size of the generated image in pixels per side. (Default: {})", imageSize).c_str())
+    ("prefix,p", po::value<std::string>(), std::format("File name prefix. (Default: {})", baseFileName).c_str())
     ("output,o", po::value<std::string>(), std::format("Output folder for the generated tags. (Default: {})", path).c_str())
   ;
 
