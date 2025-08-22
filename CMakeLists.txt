@@ -22,12 +22,16 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 set(SOURCE_FILES main.cpp)
 set(GENERATE_TAGS_SOURCE_FILES generate_tags.cpp)
+set(GENERATE_CHECKERBOARD_SOURCE_FILES generate_checkerboard.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_executable("${PROJECT_NAME}-generate-tags" ${GENERATE_TAGS_SOURCE_FILES})
+add_executable("${PROJECT_NAME}-generate-checkerboard" ${GENERATE_CHECKERBOARD_SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories("${PROJECT_NAME}-generate-tags" PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories("${PROJECT_NAME}-generate-checkerboard" PRIVATE ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_link_libraries("${PROJECT_NAME}-generate-tags" ${OpenCV_LIBS} Boost::program_options)
+target_link_libraries("${PROJECT_NAME}-generate-checkerboard" ${OpenCV_LIBS} Boost::program_options)
