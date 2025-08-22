@@ -13,7 +13,7 @@ namespace po = boost::program_options;
 template <typename T> std::string vec2str(std::vector<T> v) {
   std::string str = "{";
 
-  for (int i = 0; i < v.size(); i++) {
+  for (unsigned int i = 0; i < v.size(); i++) {
     if (i > 0) {
       str += ",";
     }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
   cv::aruco::Dictionary dictionary =
       cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
 
-  for (int id = 0; id < markerIds.size(); id++) {
+  for (unsigned int id = 0; id < markerIds.size(); id++) {
     cv::aruco::generateImageMarker(dictionary, markerIds[id], markerSize,
                                   markerImage, 1);
 
