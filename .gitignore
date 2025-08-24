@@ -1,5 +1,5 @@
 .kdev4/
 build/
-video-analysis.kdev4
+*.kdev4
 .vscode/
 .continue/
