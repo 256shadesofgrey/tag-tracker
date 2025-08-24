@@ -35,7 +35,7 @@ target_include_directories("${PROJECT_NAME}-generate-tags" PRIVATE ${Boost_INCLU
 target_include_directories("${PROJECT_NAME}-generate-checkerboard" PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories("${PROJECT_NAME}-camera-calibration" PRIVATE ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} Boost::program_options)
 target_link_libraries("${PROJECT_NAME}-generate-tags" ${OpenCV_LIBS} Boost::program_options)
 target_link_libraries("${PROJECT_NAME}-generate-checkerboard" ${OpenCV_LIBS} Boost::program_options)
 target_link_libraries("${PROJECT_NAME}-camera-calibration" ${OpenCV_LIBS} Boost::program_options)
