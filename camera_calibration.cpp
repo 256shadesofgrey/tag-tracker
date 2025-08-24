@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     ("verbose,v", po::value<int>()->default_value(0)->implicit_value(1), "Display additional information. Higher value gives additional output.")
     ("width,W", po::value<int>(), std::format("Number of inner corners horizontally (i.e. columns-1). (Default: {})", checkerboardWidth).c_str())
     ("height,H", po::value<int>(), std::format("Number of inner corners vertically (i.e. rows-1). (Default: {})", checkerboardHeight).c_str())
-    ("images,i", po::value<std::string>(), std::format("Output folder. (Default: {})", path).c_str())
+    ("images,i", po::value<std::string>(), std::format("Folder containing calibration images. (Default: {})", path).c_str())
     ("ww", po::value<int>(), std::format("Width of the image display windows. (Default: {})", windowWidth).c_str())
     ("wh", po::value<int>(), std::format("Height of the image display windows. (Default: {})", windowHeight).c_str())
     ("autoarrange,a", "Arrange windows to optimally fill the screen. This does not work on wayland.")
