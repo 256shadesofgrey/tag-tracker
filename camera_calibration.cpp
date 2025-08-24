@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
   int screenHeight = 2160;
   int autoarrange = 0;
 
-  po::options_description desc("Available options");
+  po::options_description desc("Available options", 1024);
 
   desc.add_options()
     ("help,h", "Show this message.")
