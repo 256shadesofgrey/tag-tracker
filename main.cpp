@@ -17,9 +17,9 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("help,h", "Show this message.")
     ("verbose,v", po::value<int>()->default_value(0)->implicit_value(1), "Display additional information. Higher value gives additional output.")
-    ("source,s", po::value<std::string>(), std::format("Video stream source. (Default: {})", videoSource).c_str())
-    ("ww", po::value<int>(), std::format("Width of the image display windows. (Default: {})", windowWidth).c_str())
-    ("wh", po::value<int>(), std::format("Height of the image display windows. (Default: {})", windowHeight).c_str())
+    ("source,s", po::value<std::string>()->default_value(videoSource), "Video stream source.")
+    ("ww", po::value<int>()->default_value(windowWidth), "Width of the image display windows.")
+    ("wh", po::value<int>()->default_value(windowHeight), "Height of the image display windows.")
   ;
 
   po::variables_map vm;
