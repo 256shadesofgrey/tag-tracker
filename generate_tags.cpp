@@ -32,15 +32,15 @@ int main(int argc, char *argv[]) {
   std::vector<int> markerIds = {0};
   std::string path = "./output/";
 
-  po::options_description desc("Available options");
+  po::options_description desc("Available options", 1024);
   desc.add_options()
     ("help,h", "Show this message.")
     ("verbose,v", "Display additional information.")
-    ("id,i", po::value<std::vector<int>>(), std::format("List of IDs encoded in the marker. (Default: {})", vec2str(markerIds)).c_str())
-    ("size,s", po::value<int>(), std::format("Size of the marker in squares per side. (Default: {})", markerSize).c_str())
-    ("resolution,r", po::value<int>(), std::format("Size of the generated image in pixels per side. (Default: {})", imageSize).c_str())
-    ("prefix,p", po::value<std::string>(), std::format("File name prefix. (Default: {})", prefix).c_str())
-    ("output,o", po::value<std::string>(), std::format("Output folder for the generated tags. (Default: {})", path).c_str())
+    ("id,i", po::value<std::vector<int>>()->default_value(markerIds, vec2str(markerIds)), "List of IDs encoded in the marker.")
+    ("size,s", po::value<int>()->default_value(markerSize), "Size of the marker in squares per side.")
+    ("resolution,r", po::value<int>()->default_value(imageSize), "Size of the generated image in pixels per side.")
+    ("prefix,p", po::value<std::string>()->default_value(prefix), "File name prefix.")
+    ("output,o", po::value<std::string>()->default_value(path), "Output folder for the generated tags.")
   ;
 
   po::variables_map vm;
