@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("dict")) {
-    dict = vm["dict"].as<cv::aruco::PredefinedDictionaryType>();
+    dict = (cv::aruco::PredefinedDictionaryType)vm["dict"].as<int>();
   }
 
   if (vm.count("id")) {
