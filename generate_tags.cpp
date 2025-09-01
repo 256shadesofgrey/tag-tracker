@@ -12,10 +12,25 @@
 
 namespace po = boost::program_options;
 
+// This should be a map like arucoDict, but this is shorter and it fits.
+int sizeFromDict(cv::aruco::PredefinedDictionaryType dict) {
+  using namespace cv::aruco;
+
+  int size = 6;
+  if (dict <= DICT_7X7_100) {
+    size = dict/4+4;
+  } else if (dict >= DICT_APRILTAG_16h5 && dict <= DICT_APRILTAG_36h10) {
+    size = DICT_APRILTAG_36h10 - 13;
+  }
+
+  return size;
+}
+
 int main(int argc, char *argv[]) {
   int verbosity = 0;
 
   int markerSize = 8;
+  cv::aruco::PredefinedDictionaryType dict = cv::aruco::DICT_6X6_250;
   int imageSize = 200;
   std::string prefix = "marker";
   std::vector<int> markerIds = {0};
@@ -26,7 +41,7 @@ int main(int argc, char *argv[]) {
     ("help,h", "Show this message.")
     ("verbose,v", "Display additional information.")
     ("id,i", po::value<std::vector<int>>()->default_value(markerIds, vec2str(markerIds)), "List of IDs encoded in the marker.")
-    ("size,s", po::value<int>()->default_value(markerSize), "Size of the marker in squares per side.")
+    ("dict,d", po::value<int>()->default_value(dict), std::format("ArUco dictionary to use. These are the possible options:\n{}", dictsString()).c_str())
     ("resolution,r", po::value<int>()->default_value(imageSize), "Size of the generated image in pixels per side.")
     ("prefix,p", po::value<std::string>()->default_value(prefix), "File name prefix.")
     ("output,o", po::value<std::string>()->default_value(path), "Output folder for the generated tags.")
@@ -34,7 +49,7 @@ int main(int argc, char *argv[]) {
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
-  // po::notify(vm);
+  po::notify(vm);
 
   if (vm.count("help")) {
     std::cout << desc << std::endl;
@@ -47,8 +62,8 @@ int main(int argc, char *argv[]) {
     markerIds = vm["id"].as<std::vector<int>>();
   }
 
-  if (vm.count("size")) {
-    markerSize = vm["size"].as<int>();
+  if (vm.count("dict")) {
+    dict = (cv::aruco::PredefinedDictionaryType)vm["dict"].as<int>();
   }
 
   if (vm.count("resolution")) {
@@ -63,8 +78,12 @@ int main(int argc, char *argv[]) {
     path = std::filesystem::path(vm["output"].as<std::string>()).lexically_normal().string();
   }
 
+  // Must be big enough to fit the selected dictionary + margin on both sides.
+  markerSize = sizeFromDict(dict)+2;
+
   if (verbosity > 0) {
     std::cout << "Setting IDs to: " << vec2str(markerIds) << std::endl;
+    std::cout << "Setting dictionary to: " << dictName(dict) << std::endl;
     std::cout << "Setting marker size to: " << markerSize << std::endl;
     std::cout << "Setting image size to: " << imageSize << std::endl;
     std::cout << "Setting filename prefix to: " << prefix << std::endl;
@@ -78,9 +97,8 @@ int main(int argc, char *argv[]) {
   double imageScale = imageSize / markerSize;
 
   cv::Mat markerImage;
-  // TODO: make dictionary selection based on tag size.
   cv::aruco::Dictionary dictionary =
-      cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+      cv::aruco::getPredefinedDictionary(dict);
 
   for (unsigned int id = 0; id < markerIds.size(); id++) {
     cv::aruco::generateImageMarker(dictionary, markerIds[id], markerSize,
