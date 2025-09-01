@@ -8,20 +8,9 @@
 #include <vector>
 #include <filesystem>
 
+#include <tag-tracker.h>
+
 namespace po = boost::program_options;
-
-template <typename T> std::string vec2str(std::vector<T> v) {
-  std::string str = "{";
-
-  for (unsigned int i = 0; i < v.size(); i++) {
-    if (i > 0) {
-      str += ",";
-    }
-    str += std::to_string(v[i]);
-  }
-
-  return str += "}";
-}
 
 int main(int argc, char *argv[]) {
   int verbosity = 0;
