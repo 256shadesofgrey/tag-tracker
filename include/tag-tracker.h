@@ -13,8 +13,7 @@
 //#define DICTNAME(a) std::string(#a).substr(11)
 
 // I am really looking forward to C++26 reflection features to make this unnecessary...
-using namespace cv::aruco;
-#define X(a) {a, std::string(#a)},
+#define X(a) {cv::aruco::a, std::string(#a)},
 static const std::map<const cv::aruco::PredefinedDictionaryType, const std::string> arucoDict = {
   X(DICT_4X4_50)
   X(DICT_4X4_100)
