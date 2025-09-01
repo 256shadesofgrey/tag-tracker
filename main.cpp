@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   std::string videoSource = "http://192.168.178.10:8080/video";
   int windowWidth = 1920;
   int windowHeight = 1080;
-  int dict = cv::aruco::DICT_6X6_250;
+  cv::aruco::PredefinedDictionaryType dict = cv::aruco::DICT_6X6_250;
   std::vector<int> markerIds = {0};
 
   po::options_description desc("Available options", 1024);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("dict")) {
-    dict = vm["dict"].as<int>();
+    dict = vm["dict"].as<cv::aruco::PredefinedDictionaryType>();
   }
 
   if (vm.count("id")) {

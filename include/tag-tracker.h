@@ -15,7 +15,7 @@
 // I am really looking forward to C++26 reflection features to make this unnecessary...
 using namespace cv::aruco;
 #define X(a) {a, std::string(#a)},
-static const std::map<const int, const std::string> arucoDict = {
+static const std::map<const cv::aruco::PredefinedDictionaryType, const std::string> arucoDict = {
   X(DICT_4X4_50)
   X(DICT_4X4_100)
   X(DICT_4X4_250)
@@ -41,7 +41,7 @@ static const std::map<const int, const std::string> arucoDict = {
 };
 #undef X
 
-std::string dictName(int dict) {
+std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;
   try{
     ret = arucoDict.at(dict);
