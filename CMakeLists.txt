@@ -12,13 +12,15 @@ set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}-g -pg")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -pg")
 
-project(video-analysis)
+project(tag-tracker)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(Boost CONFIG REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(SOURCE_FILES main.cpp)
 set(GENERATE_TAGS_SOURCE_FILES generate_tags.cpp)
