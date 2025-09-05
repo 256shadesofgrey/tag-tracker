@@ -188,8 +188,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "cameraMatrix : " << cameraMatrix << std::endl;
   std::cout << "distCoeffs : " << distCoeffs << std::endl;
-  std::cout << "Rotation vector : " << R << std::endl;
-  std::cout << "Translation vector : " << T << std::endl;
+
+  if (verbosity > 0) {
+    std::cout << "Rotation vector : " << R << std::endl;
+    std::cout << "Translation vector : " << T << std::endl;
+  }
 
   return 0;
 }
