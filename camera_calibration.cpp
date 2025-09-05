@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
   }
 #endif // SCREEN_SIZE_DETECTION
 
-  if (verbosity > 0) {
+  if (verbosity > 1) {
     std::cout << "Setting width to: " << checkerboardWidth << std::endl;
     std::cout << "Setting height to: " << checkerboardHeight << std::endl;
     std::cout << "Calibration images: " << path << std::endl;
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Screen height: " << screenHeight << std::endl;
   }
 
-  if (verbosity > 1) {
+  if (verbosity > 2) {
     std::cout << "Build info: " << std::endl << cv::getBuildInformation() << std::endl;
   }
 
