@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   int screenWidth = 3840;
   int screenHeight = 2160;
   int autoarrange = 0;
+  std::string calibrationValuesFIle = "";
 
   po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
@@ -44,6 +45,7 @@ int main(int argc, char *argv[]) {
     ("autoarrange,a", "Arrange windows to optimally fill the screen. This does not work on wayland.")
     ("sw", po::value<int>()->default_value(screenWidth), "Width of the screen.")
     ("sh", po::value<int>()->default_value(screenHeight), "Height of the screen.")
+    ("save-file,s", po::value<std::string>()->default_value(calibrationValuesFIle)->implicit_value("calibration.txt"), "File to save calibration values to. By default the value is empty and so nothing is saved.")
   ;
 
   po::variables_map vm;
@@ -87,6 +89,10 @@ int main(int argc, char *argv[]) {
 
   if (vm.count("sh")) {
     screenHeight = vm["sh"].as<int>();
+  }
+
+  if (vm.count("save-file")) {
+    calibrationValuesFIle = std::filesystem::path(vm["save-file"].as<std::string>()).lexically_normal().string();
   }
 
 #if SCREEN_SIZE_DETECTION
@@ -186,12 +192,21 @@ int main(int argc, char *argv[]) {
 
   cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.rows,gray.cols), cameraMatrix, distCoeffs, R, T);
 
-  std::cout << "cameraMatrix : " << cameraMatrix << std::endl;
-  std::cout << "distCoeffs : " << distCoeffs << std::endl;
+  std::string cmStr = dmat2str(cameraMatrix);
+  std::string dmStr = dmat2str(distCoeffs);
+
+  std::cout << "cameraMatrix : " << cmStr << std::endl;
+  std::cout << "distCoeffs : " << dmStr << std::endl;
 
   if (verbosity > 0) {
     std::cout << "Rotation vector : " << R << std::endl;
     std::cout << "Translation vector : " << T << std::endl;
+  }
+
+  if (calibrationValuesFIle.length() > 0) {
+    std::ofstream calFile(calibrationValuesFIle);
+    calFile << cmStr << "\n" << dmStr << std::endl;
+    calFile.close();
   }
 
   return 0;

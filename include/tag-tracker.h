@@ -78,3 +78,17 @@ template <typename T> std::string vec2str(std::vector<T> v) {
 
   return str += "}";
 }
+
+std::string dmat2str(cv::Mat m) {
+  std::string str = "{";
+  cv::Mat m1d = m.reshape(0, 1);
+
+  for (int i = 0; i < m1d.size().width; i++) {
+    if (i > 0) {
+      str += ",";
+    }
+    str += std::to_string(m1d.at<double>(i));
+  }
+
+  return str += "}";
+}
