@@ -2,6 +2,7 @@
 #include <iostream>
 #include <format>
 #include <string>
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
@@ -19,6 +20,13 @@ int main(int argc, char *argv[]) {
   std::vector<double> camMatrixArray = {3529.184800454334, 0, 2040.965768074567, 0, 3514.936017987171, 1126.105514215219, 0, 0, 1};
   std::vector<double> distCoeffsArray = {0.1111941981103543, -1.233444736852835, 0.0004572563505563506, 0.0004007139313956278, 5.054536061947804};
 
+  std::string path = "";
+  std::string folder = "";
+  std::string extension = "";
+  int checkerboardWidth = 8;
+  int checkerboardHeight = 5;
+  bool interactiveCalibration = false;
+
   po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
   desc.add_options()
@@ -31,6 +39,12 @@ int main(int argc, char *argv[]) {
     ("length,l", po::value<double>()->default_value(markerLength), "Size of the marker in meters.")
     ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool.")
     ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool.")
+    ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, \
+                                                                                                                    calibration will be done with images matching the pattern. This overrides the cm and dc options. \
+                                                                                                                    This will be used as output folder (and file extension) instead if using interactive calibration.")
+    ("width,W", po::value<int>()->default_value(checkerboardWidth), "Number of inner corners horizontally (i.e. columns-1).")
+    ("height,H", po::value<int>()->default_value(checkerboardHeight), "Number of inner corners vertically (i.e. rows-1).")
+    ("interactive-calibration,c", "Does interactive calibration before starting to track the markers. You will have to point the camera at the chessboard pattern from different positions. This overrides the cm and dc options.")
   ;
 
   po::variables_map vm;
@@ -80,11 +94,32 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (verbosity > 0) {
-    std::cout << "Video source: " << videoSource << std::endl;
-    std::cout << "Window width: " << windowWidth << std::endl;
-    std::cout << "Window height: " << windowHeight << std::endl;
-    std::cout << "Dictionary used: " << dictName(dict) << std::endl;
+  if (vm.count("calibration-images")) {
+    std::filesystem::path p = std::filesystem::path(vm["calibration-images"].as<std::string>()).lexically_normal();
+    path = p.string();
+    folder = p.parent_path().string();
+    extension = p.extension().string();
+
+    if (verbosity > 1) {
+      std::string filename = p.filename().string();
+      std::cout << "Resolving calibration images as..." << std::endl;
+      std::cout << "Full path: " << path << std::endl;
+      std::cout << "Containing folder: " << folder << std::endl;
+      std::cout << "Filename: " << filename << std::endl;
+      std::cout << "File extension: " << extension << std::endl;
+    }
+  }
+
+  if (vm.count("width")) {
+    checkerboardWidth = vm["width"].as<int>();
+  }
+
+  if (vm.count("height")) {
+    checkerboardHeight = vm["height"].as<int>();
+  }
+
+  if (vm.count("interactive-calibration")) {
+    interactiveCalibration = true;
   }
 
   cv::VideoCapture cap(videoSource);
