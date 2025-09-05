@@ -36,14 +36,14 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("help,h", "Show this message.")
     ("verbose,v", po::value<int>()->default_value(0)->implicit_value(1), "Display additional information. Higher value gives additional output.")
-    ("width,W", po::value<int>(), std::format("Number of inner corners horizontally (i.e. columns-1). (Default: {})", checkerboardWidth).c_str())
-    ("height,H", po::value<int>(), std::format("Number of inner corners vertically (i.e. rows-1). (Default: {})", checkerboardHeight).c_str())
-    ("images,i", po::value<std::string>(), std::format("Folder containing calibration images. (Default: {})", path).c_str())
-    ("ww", po::value<int>(), std::format("Width of the image display windows. (Default: {})", windowWidth).c_str())
-    ("wh", po::value<int>(), std::format("Height of the image display windows. (Default: {})", windowHeight).c_str())
+    ("width,W", po::value<int>()->default_value(checkerboardWidth), "Number of inner corners horizontally (i.e. columns-1).")
+    ("height,H", po::value<int>()->default_value(checkerboardHeight), "Number of inner corners vertically (i.e. rows-1).")
+    ("images,i", po::value<std::string>()->default_value(path), "Folder containing calibration images.")
+    ("ww", po::value<int>()->default_value(windowWidth), "Width of the image display windows.")
+    ("wh", po::value<int>()->default_value(windowHeight), "Height of the image display windows.")
     ("autoarrange,a", "Arrange windows to optimally fill the screen. This does not work on wayland.")
-    ("sw", po::value<int>(), std::format("Width of the screen. (Default: {})", screenWidth).c_str())
-    ("sh", po::value<int>(), std::format("Height of the screen. (Default: {})", screenHeight).c_str())
+    ("sw", po::value<int>()->default_value(screenWidth), "Width of the screen.")
+    ("sh", po::value<int>()->default_value(screenHeight), "Height of the screen.")
   ;
 
   po::variables_map vm;
