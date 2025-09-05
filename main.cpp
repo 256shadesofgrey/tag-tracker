@@ -3,6 +3,8 @@
 #include <format>
 #include <string>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
@@ -27,6 +29,9 @@ int main(int argc, char *argv[]) {
   double markerLength = 0.1;
   std::vector<double> camMatrixArray = {3529.184800454334, 0, 2040.965768074567, 0, 3514.936017987171, 1126.105514215219, 0, 0, 1};
   std::vector<double> distCoeffsArray = {0.1111941981103543, -1.233444736852835, 0.0004572563505563506, 0.0004007139313956278, 5.054536061947804};
+  std::string calibrationFile = "calibration.txt";
+  bool useCalFileCamMat = true;
+  bool useCalFileDistCoeffs = true;
 
 #if CAMERA_CALIBRATION
   std::string path = "";
@@ -47,8 +52,13 @@ int main(int argc, char *argv[]) {
     ("wh", po::value<int>()->default_value(windowHeight), "Height of the image display windows.")
     ("dict,d", po::value<int>()->default_value(dict), std::format("ArUco dictionary to expect. These are the possible options:\n{}", dictsString()).c_str())
     ("length,l", po::value<double>()->default_value(markerLength), "Size of the marker in meters.")
-    ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool.")
-    ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool.")
+    ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool. \
+                                                                                                       The default value is overridden if the program detects a calibration file. \
+                                                                                                       If this is set explicitly, the calibration file is ignored even if it exists.")
+    ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool. \
+                                                                                                         The default value is overridden if the program detects a calibration file. \
+                                                                                                         If this is set explicitly, the calibration file is ignored even if it exists.")
+    ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc.")
 #if CAMERA_CALIBRATION
     ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, \
                                                                                                                     calibration will be done with images matching the pattern. This overrides the cm and dc options. \
@@ -88,7 +98,15 @@ int main(int argc, char *argv[]) {
     markerLength = vm["length"].as<double>();
   }
 
+  if (vm.count("calibration-file")) {
+    calibrationFile = vm["calibration-file"].as<std::string>();
+  }
+
   if (vm.count("cm")) {
+    if (!vm["cm"].defaulted()) {
+      useCalFileCamMat = false;
+    }
+
     camMatrixArray = vm["cm"].as<std::vector<double> >();
 
     if (camMatrixArray.size() != 9) {
@@ -98,11 +116,68 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("dc")) {
+    if (!vm["dc"].defaulted()) {
+      useCalFileDistCoeffs = false;
+    }
+
     distCoeffsArray = vm["dc"].as<std::vector<double> >();
 
     if (distCoeffsArray.size() != 5) {
       std::cout << "Expected 5 values for distortion coefficients, but got "<< distCoeffsArray.size() << "." << std::endl;
       return 1;
+    }
+  }
+
+  // Attempt to read calibration file if it exists and either of the values from it are not set explicitly.
+  std::filesystem::path cfp = std::filesystem::path(calibrationFile);
+  if (std::filesystem::exists(cfp) && (useCalFileCamMat || useCalFileDistCoeffs)) {
+    bool dataValid = true;
+
+    std::ifstream cfs(cfp);
+    if (!cfs.is_open()) {
+      std::cout << "Could not open calibration file. Using default values for parameters not explicitly set." << std::endl;
+    } else {
+      std::vector<double> calVals[2];
+
+      std::string line;
+      for (int i = 0; i < 2 && dataValid; i++) {
+        if (!std::getline(cfs, line)) {
+          std::cout << "Incorrect file format for the calibration file. Using default values for parameters not explicitly set." << std::endl;
+          dataValid = false;
+          break;
+        }
+
+        // Remove the {} brackets.
+        line = line.substr(1, line.length()-2);
+        // Read all values of a line as doubles.
+        std::istringstream lineStream(line);
+        std::string stringNum;
+        while (std::getline(lineStream, stringNum, ',')) {
+          double num;
+
+          try {
+            num = std::stod(stringNum);
+          } catch(const std::exception&) {
+            std::cout << "Incorrect number format in the calibration file. Using default values for parameters not explicitly set." << std::endl;
+            dataValid = false;
+            break;
+          }
+
+          calVals[i].push_back(num);
+        }
+      }
+
+      if (dataValid) {
+        camMatrixArray = calVals[0];
+        distCoeffsArray = calVals[1];
+
+        if (verbosity > 1) {
+          std::cout << "Camera matrix from file: " << vec2str(camMatrixArray) << std::endl;
+          std::cout << "Distortion coefficients from file: " << vec2str(distCoeffsArray) << std::endl;
+        }
+      }
+
+      cfs.close();
     }
   }
 
