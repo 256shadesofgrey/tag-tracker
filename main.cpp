@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
   int windowHeight = 1080;
   cv::aruco::PredefinedDictionaryType dict = cv::aruco::DICT_6X6_250;
   double markerLength = 0.1;
-  double camMatrixArray[3][3] = {{3529.184800454334, 0, 2040.965768074567}, {0, 3514.936017987171, 1126.105514215219}, {0, 0, 1}};
-  double distCoeffsArray[5] = {0.1111941981103543, -1.233444736852835, 0.0004572563505563506, 0.0004007139313956278, 5.054536061947804};
+  std::vector<double> camMatrixArray = {3529.184800454334, 0, 2040.965768074567, 0, 3514.936017987171, 1126.105514215219, 0, 0, 1};
+  std::vector<double> distCoeffsArray = {0.1111941981103543, -1.233444736852835, 0.0004572563505563506, 0.0004007139313956278, 5.054536061947804};
 
   po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
@@ -29,6 +29,8 @@ int main(int argc, char *argv[]) {
     ("wh", po::value<int>()->default_value(windowHeight), "Height of the image display windows.")
     ("dict,d", po::value<int>()->default_value(dict), std::format("ArUco dictionary to expect. These are the possible options:\n{}", dictsString()).c_str())
     ("length,l", po::value<double>()->default_value(markerLength), "Size of the marker in meters.")
+    ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool.")
+    ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool.")
   ;
 
   po::variables_map vm;
@@ -60,6 +62,24 @@ int main(int argc, char *argv[]) {
     markerLength = vm["length"].as<double>();
   }
 
+  if (vm.count("cm")) {
+    camMatrixArray = vm["cm"].as<std::vector<double> >();
+
+    if (camMatrixArray.size() != 9) {
+      std::cout << "Expected 9 values for camera matrix, but got "<< camMatrixArray.size() << "." << std::endl;
+      return 1;
+    }
+  }
+
+  if (vm.count("dc")) {
+    distCoeffsArray = vm["dc"].as<std::vector<double> >();
+
+    if (distCoeffsArray.size() != 5) {
+      std::cout << "Expected 5 values for distortion coefficients, but got "<< distCoeffsArray.size() << "." << std::endl;
+      return 1;
+    }
+  }
+
   if (verbosity > 0) {
     std::cout << "Video source: " << videoSource << std::endl;
     std::cout << "Window width: " << windowWidth << std::endl;
@@ -85,14 +105,14 @@ int main(int argc, char *argv[]) {
 
   // Vars for detection.
   std::vector<int> markerIds = {0};
-  std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+  std::vector<std::vector<cv::Point2f> > markerCorners, rejectedCandidates;
   cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(dict);
   cv::aruco::ArucoDetector detector(dictionary, detectorParams);
 
   // Vars for pose estimation.
-  cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray);
-  cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray);
+  cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray.data());
+  cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray.data());
 
   cv::Mat objPoints(4, 1, CV_32FC3);
   objPoints.ptr<cv::Vec3f>(0)[0] = cv::Vec3f(-markerLength/2.f, markerLength/2.f, 0);
