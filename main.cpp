@@ -75,30 +75,33 @@ int main(int argc, char *argv[]) {
   }
 
   cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
-  cv::namedWindow("Edge detection", cv::WINDOW_NORMAL);
+  cv::namedWindow("Marker Detect", cv::WINDOW_NORMAL);
   cv::waitKey(100);
   cv::resizeWindow("Camera Feed", windowWidth, windowHeight);
-  cv::resizeWindow("Edge detection", windowWidth, windowHeight);
+  cv::resizeWindow("Marker Detect", windowWidth, windowHeight);
 
-  cv::Mat frame, frame_blur, frame_canny;
+  cv::Mat frameRaw, frameMarkers;
+
+  std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+  cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
+  cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(dict);
+  cv::aruco::ArucoDetector detector(dictionary, detectorParams);
 
   while (true) {
-    cap >> frame;
+    cap >> frameRaw;
 
-    if (frame.empty()) {
+    if (frameRaw.empty()) {
       std::cerr << "Error: Could not read frame." << std::endl;
       break;
     }
 
-    cv::imshow("Camera Feed", frame);
+    cv::imshow("Camera Feed", frameRaw);
 
-    // Blur image to reduce noise.
-    cv::GaussianBlur(frame, frame_blur, cv::Size(3, 3), 3, 0);
+    detector.detectMarkers(frameRaw, markerCorners, markerIds, rejectedCandidates);
+    frameMarkers = frameRaw.clone();
+    cv::aruco::drawDetectedMarkers(frameMarkers, markerCorners, markerIds);
 
-    // Edge detection.
-    cv::Canny(frame_blur, frame_canny, 50, 150);
-
-    cv::imshow("Edge detection", frame_canny);
+    cv::imshow("Marker Detect", frameMarkers);
 
     // Wait for X milliseconds. If a key is pressed, break from the loop.
     if (cv::waitKey(1) >= 0) {
