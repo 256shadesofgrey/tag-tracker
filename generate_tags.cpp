@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   std::vector<int> markerIds = {0};
   std::string path = "./output/";
 
-  po::options_description desc("Available options", 1024);
+  po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
   desc.add_options()
     ("help,h", "Show this message.")
     ("verbose,v", "Display additional information.")

@@ -9,6 +9,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <tag-tracker.h>
+
 // Change to 1 to attempt screen size detection for window arrangement.
 // Disabled by default because it does not seem to work consistently.
 // Use --sw and --sh command line options instead.
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
   int screenHeight = 2160;
   int autoarrange = 0;
 
-  po::options_description desc("Available options", 1024);
+  po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
   desc.add_options()
     ("help,h", "Show this message.")

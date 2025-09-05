@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include <tag-tracker.h>
+
 namespace po = boost::program_options;
 
 int main(int argc, char *argv[]) {
@@ -15,7 +17,7 @@ int main(int argc, char *argv[]) {
   std::string path = "./output/";
   std::string prefix = "checkerboard";
 
-  po::options_description desc("Available options");
+  po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
   desc.add_options()
     ("help,h", "Show this message.")
     ("verbose,v", "Display additional information.")

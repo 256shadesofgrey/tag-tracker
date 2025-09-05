@@ -40,6 +40,10 @@ static const std::map<const cv::aruco::PredefinedDictionaryType, const std::stri
 };
 #undef X
 
+#define HELP_LINE_LENGTH 1024
+#define HELP_OPTIONS_LENGTH 24
+#define HELP_DESCRIPTION_LENGTH (HELP_LINE_LENGTH - HELP_OPTIONS_LENGTH)
+
 std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;
   try{

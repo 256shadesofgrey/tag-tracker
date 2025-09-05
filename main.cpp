@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   double camMatrixArray[3][3] = {{3529.184800454334, 0, 2040.965768074567}, {0, 3514.936017987171, 1126.105514215219}, {0, 0, 1}};
   double distCoeffsArray[5] = {0.1111941981103543, -1.233444736852835, 0.0004572563505563506, 0.0004007139313956278, 5.054536061947804};
 
-  po::options_description desc("Available options", 1024);
+  po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
   desc.add_options()
     ("help,h", "Show this message.")
