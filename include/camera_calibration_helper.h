@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -47,14 +48,14 @@ public:
   // Return the number of images that were successfully processed.
   // If the number is less than the number of input images, some of them may have been skipped
   // and the calculated calibration results may be less accurate than expected.
-  int calibrateWithImages(std::string path = "./calibration/*.jpg");
+  int calibrateWithImages(std::filesystem::path path = "./calibration/*.jpg");
 
   // path - describes the folder to save the images to, and their file extension.
   //        If the path is not specified, no images used for calibration will not be saved.
   // Return the number of images that were successfully processed.
   // If the number is less than the number of input images, some of them may have been skipped
   // and the calculated calibration results may be less accurate than expected.
-  int calibrateInteractively(std::string path = "");
+  int calibrateInteractively(std::filesystem::path path = "");
 
   const cv::Mat& getCameraMatrix() {
     return cameraMatrix;

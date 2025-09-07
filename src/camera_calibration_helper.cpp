@@ -1,6 +1,6 @@
 #include <camera_calibration_helper.h>
 
-int CameraCalibrationHelper::calibrateWithImages(std::string path) {
+int CameraCalibrationHelper::calibrateWithImages(std::filesystem::path path) {
   resetResults();
 
   std::vector<std::vector<cv::Point3f> > objpoints;
@@ -13,7 +13,7 @@ int CameraCalibrationHelper::calibrateWithImages(std::string path) {
     }
   }
 
-  cv::glob(path, inputImagePaths);
+  cv::glob(path.string(), inputImagePaths);
 
   cv::Mat frame, gray;
 
@@ -51,7 +51,7 @@ int CameraCalibrationHelper::calibrateWithImages(std::string path) {
   return successfullyProcessedImages;
 }
 
-int CameraCalibrationHelper::calibrateInteractively(std::string path) {
+int CameraCalibrationHelper::calibrateInteractively(std::filesystem::path path) {
   resetResults();
 
   return 0;
