@@ -25,7 +25,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SOURCE_FILES main.cpp)
 set(GENERATE_TAGS_SOURCE_FILES generate_tags.cpp)
 set(GENERATE_CHECKERBOARD_SOURCE_FILES generate_checkerboard.cpp)
-set(CAMERA_CALIBRATION_SOURCE_FILES camera_calibration.cpp)
+set(CAMERA_CALIBRATION_SOURCE_FILES camera_calibration.cpp src/camera_calibration_helper.cpp)
 
 link_libraries(${OpenCV_LIBS} Boost::program_options)
 

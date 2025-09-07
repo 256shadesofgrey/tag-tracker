@@ -5,11 +5,10 @@
 #include <iostream>
 #include <string>
 #include <opencv2/opencv.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include <tag-tracker.h>
+#include <camera_calibration_helper.h>
 
 // Change to 1 to attempt screen size detection for window arrangement.
 // Disabled by default because it does not seem to work consistently.
@@ -130,24 +129,6 @@ int main(int argc, char *argv[]) {
     std::cout << "Build info: " << std::endl << cv::getBuildInformation() << std::endl;
   }
 
-  std::vector<std::vector<cv::Point3f> > objpoints;
-  std::vector<std::vector<cv::Point2f> > imgpoints;
-
-  std::vector<cv::Point3f> objp;
-  for(int c = 0; c < checkerboardWidth; c++) {
-    for(int r = 0; r < checkerboardHeight; r++){
-      objp.push_back(cv::Point3f(r,c,0));
-    }
-  }
-
-  std::vector<cv::String> images;
-  cv::glob(path, images);
-
-  cv::Mat frame, gray;
-
-  std::vector<cv::Point2f> corner_pts;
-  bool success;
-
   int winCols = 0;
   int winRows = 0;
 
@@ -156,27 +137,17 @@ int main(int argc, char *argv[]) {
     winRows = screenHeight / windowHeight;
   }
 
+  CameraCalibrationHelper cch(checkerboardWidth, checkerboardHeight);
+  cch.calibrateWithImages(path);
+  const std::vector<cv::String>& images = cch.getProcessedImagePaths();
+  const std::vector<cv::Mat>& processedImages = cch.getProcessedImages();
+
   for (unsigned int img = 0; img < images.size(); img++) {
     cv::namedWindow(std::format("Image{}: {}", img, images[img]), cv::WINDOW_NORMAL);
     cv::resizeWindow(std::format("Image{}: {}", img, images[img]), windowWidth, windowHeight);
 
-    frame = cv::imread(images[img]);
-    cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
-
-    success = cv::findChessboardCorners(gray, cv::Size(checkerboardHeight, checkerboardWidth), corner_pts, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FAST_CHECK | cv::CALIB_CB_NORMALIZE_IMAGE);
-
-    if(success)
-    {
-      cv::TermCriteria criteria(cv::TermCriteria::EPS | cv::TermCriteria::MAX_ITER, 30, 0.001);
-      cv::cornerSubPix(gray,corner_pts,cv::Size(11,11), cv::Size(-1,-1),criteria);
-      cv::drawChessboardCorners(frame, cv::Size(checkerboardHeight, checkerboardWidth), corner_pts, success);
-
-      objpoints.push_back(objp);
-      imgpoints.push_back(corner_pts);
-    }
-
-    cv::imshow(std::format("Image{}: {}", img, images[img]), frame);
-    cv::waitKey(1);
+    cv::imshow(std::format("Image{}: {}", img, images[img]), processedImages[img]);
+    cv::waitKey(10);
     cv::resizeWindow(std::format("Image{}: {}", img, images[img]), windowWidth, windowHeight);
 
     if (autoarrange) {
@@ -188,19 +159,15 @@ int main(int argc, char *argv[]) {
 
   cv::destroyAllWindows();
 
-  cv::Mat cameraMatrix,distCoeffs,R,T;
-
-  cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.rows,gray.cols), cameraMatrix, distCoeffs, R, T);
-
-  std::string cmStr = dmat2str(cameraMatrix);
-  std::string dmStr = dmat2str(distCoeffs);
+  std::string cmStr = dmat2str(cch.getCameraMatrix());
+  std::string dmStr = dmat2str(cch.getDistortionCoefficients());
 
   std::cout << "cameraMatrix : " << cmStr << std::endl;
   std::cout << "distCoeffs : " << dmStr << std::endl;
 
   if (verbosity > 0) {
-    std::cout << "Rotation vector : " << R << std::endl;
-    std::cout << "Translation vector : " << T << std::endl;
+    std::cout << "Rotation vector : " << cch.getRotationVectors() << std::endl;
+    std::cout << "Translation vector : " << cch.getTranslationVectors() << std::endl;
   }
 
   if (calibrationValuesFIle.length() > 0) {
