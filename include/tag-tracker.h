@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <filesystem>
+#include <fstream>
 #include <opencv2/aruco.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -44,7 +46,9 @@ static const std::map<const cv::aruco::PredefinedDictionaryType, const std::stri
 #define HELP_OPTIONS_LENGTH 24
 #define HELP_DESCRIPTION_LENGTH (HELP_LINE_LENGTH - HELP_OPTIONS_LENGTH)
 
-std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
+#define DEFAULT_VIDEO_SOURCE "http://192.168.178.10:8080/video"
+
+inline std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;
   try{
     ret = arucoDict.at(dict);
@@ -55,7 +59,7 @@ std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   return ret;
 }
 
-std::string dictsString() {
+inline std::string dictsString() {
   std::stringstream dictStream;
 
   for (auto d : arucoDict) {
@@ -66,7 +70,7 @@ std::string dictsString() {
   return dictStream.str();
 }
 
-template <typename T> std::string vec2str(std::vector<T> v) {
+template <typename T> inline std::string vec2str(std::vector<T> v) {
   std::string str = "{";
 
   for (unsigned int i = 0; i < v.size(); i++) {
@@ -79,7 +83,7 @@ template <typename T> std::string vec2str(std::vector<T> v) {
   return str += "}";
 }
 
-std::string dmat2str(cv::Mat m) {
+inline std::string dmat2str(cv::Mat m) {
   std::string str = "{";
   cv::Mat m1d = m.reshape(0, 1);
 
@@ -91,4 +95,16 @@ std::string dmat2str(cv::Mat m) {
   }
 
   return str += "}";
+}
+
+inline bool saveCalibrationFile(std::filesystem::path cfName, std::string calibrationMatrixStr, std::string distortionCoefficientsStr) {
+  std::ofstream calFile(cfName);
+  calFile << calibrationMatrixStr << "\n" << distortionCoefficientsStr << std::endl;
+  calFile.close();
+
+  return true;
+}
+
+inline bool saveCalibrationFile(std::filesystem::path cfName, cv::Mat calibrationMatrix, cv::Mat distortionCoefficients) {
+  return saveCalibrationFile(cfName, dmat2str(calibrationMatrix), dmat2str(distortionCoefficients));
 }

@@ -9,20 +9,18 @@
 #include <opencv2/aruco.hpp>
 
 #include <tag-tracker.h>
+#include <camera_calibration_helper.h>
 
 // Set to 1 to enable built-in camera calibration features.
-// This is off by default because the feature isn't ready yet.
-// Use the output given by the camera_calibration program
-// and feed them to the --cm and --dc options respectively.
 #ifndef CAMERA_CALIBRATION
-#define CAMERA_CALIBRATION 0
+#define CAMERA_CALIBRATION 1
 #endif
 
 namespace po = boost::program_options;
 
 int main(int argc, char *argv[]) {
   int verbosity = 0;
-  std::string videoSource = "http://192.168.178.10:8080/video";
+  std::string videoSource = DEFAULT_VIDEO_SOURCE;
   int windowWidth = 1920;
   int windowHeight = 1080;
   cv::aruco::PredefinedDictionaryType dict = cv::aruco::DICT_6X6_250;
@@ -35,11 +33,11 @@ int main(int argc, char *argv[]) {
 
 #if CAMERA_CALIBRATION
   std::string path = "";
-  std::string folder = "";
-  std::string extension = "";
   int checkerboardWidth = 8;
   int checkerboardHeight = 5;
   bool interactiveCalibration = false;
+  bool calibration = false;
+  bool saveCalFile = false;
 #endif // CAMERA_CALIBRATION
 
   po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
@@ -58,14 +56,15 @@ int main(int argc, char *argv[]) {
     ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool. \
                                                                                                          The default value is overridden if the program detects a calibration file. \
                                                                                                          If this is set explicitly, the calibration file is ignored even if it exists.")
-    ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc.")
+    ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile)->implicit_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc.\
+                                                                                                                       If this parameter is explicitly set and calibration is performed, it will be used as output file for the calibration values.")
 #if CAMERA_CALIBRATION
     ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, \
                                                                                                                     calibration will be done with images matching the pattern. This overrides the cm and dc options. \
                                                                                                                     This will be used as output folder (and file extension) instead if using interactive calibration.")
     ("width,W", po::value<int>()->default_value(checkerboardWidth), "Number of inner corners horizontally (i.e. columns-1).")
     ("height,H", po::value<int>()->default_value(checkerboardHeight), "Number of inner corners vertically (i.e. rows-1).")
-    ("interactive-calibration,c", "Does interactive calibration before starting to track the markers. You will have to point the camera at the chessboard pattern from different positions. This overrides the cm and dc options.")
+    ("ic", "Does interactive calibration before starting to track the markers. You will have to point the camera at the chessboard pattern from different positions. This overrides the cm and dc options.")
 #endif // CAMERA_CALIBRATION
   ;
 
@@ -99,6 +98,9 @@ int main(int argc, char *argv[]) {
   }
 
   if (vm.count("calibration-file")) {
+    if (!vm["calibration-file"].defaulted()) {
+      saveCalFile = true;
+    }
     calibrationFile = vm["calibration-file"].as<std::string>();
   }
 
@@ -183,19 +185,8 @@ int main(int argc, char *argv[]) {
 
 #if CAMERA_CALIBRATION
   if (vm.count("calibration-images")) {
-    std::filesystem::path p = std::filesystem::path(vm["calibration-images"].as<std::string>()).lexically_normal();
-    path = p.string();
-    folder = p.parent_path().string();
-    extension = p.extension().string();
-
-    if (verbosity > 1) {
-      std::string filename = p.filename().string();
-      std::cout << "Resolving calibration images as..." << std::endl;
-      std::cout << "Full path: " << path << std::endl;
-      std::cout << "Containing folder: " << folder << std::endl;
-      std::cout << "Filename: " << filename << std::endl;
-      std::cout << "File extension: " << extension << std::endl;
-    }
+    path = vm["calibration-images"].as<std::string>();
+    calibration = true;
   }
 
   if (vm.count("width")) {
@@ -206,7 +197,8 @@ int main(int argc, char *argv[]) {
     checkerboardHeight = vm["height"].as<int>();
   }
 
-  if (vm.count("interactive-calibration")) {
+  if (vm.count("ic")) {
+    calibration = true;
     interactiveCalibration = true;
   }
 #endif // CAMERA_CALIBRATION
@@ -218,6 +210,29 @@ int main(int argc, char *argv[]) {
               << std::endl;
     return -1;
   }
+
+  // Vars for pose estimation.
+  cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray.data());
+  cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray.data());
+
+#if CAMERA_CALIBRATION
+  if (calibration) {
+    CameraCalibrationHelper cch(checkerboardWidth, checkerboardHeight);
+
+    if (interactiveCalibration) {
+      cch.calibrateInteractively(cap, path);
+    } else {
+      cch.calibrateWithImages(path);
+    }
+
+    camMatrix = cch.getCameraMatrix();
+    distCoeffs = cch.getDistortionCoefficients();
+
+    if (saveCalFile) {
+      saveCalibrationFile(calibrationFile, camMatrix, distCoeffs);
+    }
+  }
+#endif // CAMERA_CALIBRATION
 
   cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
   cv::namedWindow("Marker Detect", cv::WINDOW_NORMAL);
@@ -233,10 +248,6 @@ int main(int argc, char *argv[]) {
   cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(dict);
   cv::aruco::ArucoDetector detector(dictionary, detectorParams);
-
-  // Vars for pose estimation.
-  cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray.data());
-  cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray.data());
 
   cv::Mat objPoints(4, 1, CV_32FC3);
   objPoints.ptr<cv::Vec3f>(0)[0] = cv::Vec3f(-markerLength/2.f, markerLength/2.f, 0);

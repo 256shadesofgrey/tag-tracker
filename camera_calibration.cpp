@@ -171,9 +171,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (calibrationValuesFIle.length() > 0) {
-    std::ofstream calFile(calibrationValuesFIle);
-    calFile << cmStr << "\n" << dmStr << std::endl;
-    calFile.close();
+    saveCalibrationFile(calibrationValuesFIle, cmStr, dmStr);
   }
 
   return 0;

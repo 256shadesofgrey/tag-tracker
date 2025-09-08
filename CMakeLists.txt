@@ -22,7 +22,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp src/camera_calibration_helper.cpp)
 set(GENERATE_TAGS_SOURCE_FILES generate_tags.cpp)
 set(GENERATE_CHECKERBOARD_SOURCE_FILES generate_checkerboard.cpp)
 set(CAMERA_CALIBRATION_SOURCE_FILES camera_calibration.cpp src/camera_calibration_helper.cpp)

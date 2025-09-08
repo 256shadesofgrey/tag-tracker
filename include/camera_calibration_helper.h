@@ -7,6 +7,8 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <tag-tracker.h>
+
 class CameraCalibrationHelper {
 private:
   const int checkerboardWidth = 0;
@@ -49,13 +51,30 @@ public:
   // If the number is less than the number of input images, some of them may have been skipped
   // and the calculated calibration results may be less accurate than expected.
   int calibrateWithImages(std::filesystem::path path = "./calibration/*.jpg");
+  int calibrateWithImages(const std::vector<cv::Mat>& images);
 
   // path - describes the folder to save the images to, and their file extension.
   //        If the path is not specified, no images used for calibration will not be saved.
   // Return the number of images that were successfully processed.
   // If the number is less than the number of input images, some of them may have been skipped
   // and the calculated calibration results may be less accurate than expected.
-  int calibrateInteractively(std::filesystem::path path = "");
+  // If the number is negative, the function failed to open the video source.
+  int calibrateInteractively(cv::VideoCapture& videoSource, std::filesystem::path path = "");
+  int calibrateInteractively(std::string videoSourceStr = DEFAULT_VIDEO_SOURCE, std::filesystem::path path = "") {
+    cv::VideoCapture cap(videoSourceStr);
+
+    if (!cap.isOpened()) {
+      std::cerr << "Error: Could not open IP camera at " << videoSourceStr << "."
+                << std::endl;
+      return -1;
+    }
+
+    int processedImgCount = calibrateInteractively(cap, path);
+
+    cap.release();
+
+    return processedImgCount;
+  }
 
   const cv::Mat& getCameraMatrix() {
     return cameraMatrix;
