@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  // Vars for pose estimation.
+  // Setting the camera calibration values to the values read from the file, or the parameters.
   cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray.data());
   cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray.data());
 
@@ -225,6 +225,7 @@ int main(int argc, char *argv[]) {
       cch.calibrateWithImages(path);
     }
 
+    // Setting camera calibration values to the ones just determined, overwriting the ones from the config file or program options.
     camMatrix = cch.getCameraMatrix();
     distCoeffs = cch.getDistortionCoefficients();
 
