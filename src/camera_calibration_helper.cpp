@@ -1,10 +1,6 @@
 #include <camera_calibration_helper.h>
 
 #include <iostream>
-#include <mutex>
-#include <thread>
-
-std::mutex frameMutex;
 
 #define DEFAULT_CALIBRATION_IMAGE_COUNT 9
 #define PROCESSED_IMAGE_FILENAME_PREFIX "processed_"
@@ -91,29 +87,6 @@ int CameraCalibrationHelper::calibrateWithImages(const std::vector<cv::Mat>& ima
   return successfullyProcessedImages;
 }
 
-void liveFeed(cv::VideoCapture& videoSource, cv::Mat& frame, bool& showFeed) {
-  cv::namedWindow("Calibration Preview", cv::WINDOW_NORMAL);
-
-  std::unique_lock<std::mutex> lock(frameMutex, std::defer_lock);
-
-  while(showFeed){
-    lock.lock();
-    videoSource >> frame;
-    lock.unlock();
-
-    if (frame.empty()) {
-      cv::waitKey(1);
-      continue;
-    }
-
-    cv::imshow("Calibration Preview", frame);
-
-    cv::waitKey(1);
-  }
-
-  cv::destroyWindow("Calibration Preview");
-}
-
 int CameraCalibrationHelper::calibrateInteractively(cv::VideoCapture& videoSource, std::filesystem::path path) {
   resetResults();
 
@@ -128,56 +101,51 @@ int CameraCalibrationHelper::calibrateInteractively(cv::VideoCapture& videoSourc
   }
 
   cv::Mat frame;
-  bool showFeed = true;
-  std::unique_lock<std::mutex> frameLock(frameMutex, std::defer_lock);
-  // Create preview window that will also save the most recent frame.
-  std::thread liveFeedThread(liveFeed, std::ref(videoSource), std::ref(frame), std::ref(showFeed));
+  cv::namedWindow("Calibration Preview", cv::WINDOW_NORMAL);
 
   // Take images for calibration until user aborts the process.
-  // For the first images, by default do not abort,
-  // for the following ones by default do.
+  bool takePic = true;
   bool cont = true;
-  bool retry = false;
-  for (int i = 0; cont; i++) {
-    cont = false;
+  int picsTaken = 0;
+  std::cout << "Press P, I or ENTER to take a picture, Q or ESC to abort." << std::endl;
+  std::cout << "ENTER will abort after enough pictures are taken, P will continue taking pictures indefinitely." << std::endl;
+  std::cout << "Pictures taken: " << picsTaken << std::flush;
+  std::cout.flush();
+  while (cont) {
+    videoSource >> frame;
 
-    // Prompt user whether he wants to take more images.
-    std::string response;
-    do {
-      retry = false;
-      if (i < DEFAULT_CALIBRATION_IMAGE_COUNT) {
-        std::cout << "Take another image? (Y/n): ";
-      } else {
-        std::cout << "Take another image? (y/N): ";
-      }
+    if (frame.empty()) {
+      continue;
+    }
 
-      std::getline(std::cin, response);
+    takePic = false;
 
-      if (response == "y" || response == "Y") {
-        cont = true;
-      } else if (response == "n" || response == "N") {
-        cont = false;
-      } else if (response.empty()) {
-        cont = i < DEFAULT_CALIBRATION_IMAGE_COUNT ? true : false;
-      } else {
-        // The input is not y or n, and the user did not just pick the default option by pressing enter without any other input.
-        std::cout << "Input not recognized" << std::endl;
-        retry = true;
-      }
-    } while(retry);
+    cv::imshow("Calibration Preview", frame);
 
-    if (cont) {
-      frameLock.lock();
+    int key = cv::waitKey(1);
+
+    if (key == 'p' || key == 'P' || key == 'i' || key == 'I') {
+      takePic = true;
+    } else if (key == 'q' || key == 'Q' || key == '\x1B') {
+      takePic = false;
+      cont = takePic;
+    } else if (key == '\n' || key == '\r') {
+      takePic = picsTaken < DEFAULT_CALIBRATION_IMAGE_COUNT ? true : false;
+      cont = takePic;
+    }
+
+    if (takePic) {
+      picsTaken++;
+      std::cout << CLEAR_LINE_ESCAPE_SEQUENCE << "Pictures taken: " << picsTaken << std::flush;
       inputImages.push_back(frame.clone());
-      frameLock.unlock();
     }
   }
 
+  std::cout << "\n";
+
   int processedImgCount = calibrateWithImages(inputImages);
 
-  // Stop the live feed preview.
-  showFeed = false;
-  liveFeedThread.join();
+  cv::destroyWindow("Calibration Preview");
 
   if (!saveImages) {
     return processedImgCount;

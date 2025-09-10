@@ -48,6 +48,8 @@ static const std::map<const cv::aruco::PredefinedDictionaryType, const std::stri
 
 #define DEFAULT_VIDEO_SOURCE "http://192.168.178.10:8080/video"
 
+#define CLEAR_LINE_ESCAPE_SEQUENCE "\r\x1b[0;K" // Equivalent to go back to beginning of the line, and clear the line from cursor to EOL.
+
 inline std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;
   try{
