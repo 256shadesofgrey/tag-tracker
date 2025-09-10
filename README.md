@@ -15,6 +15,10 @@ If you want to save the calibration results to skip the calibration step in the 
 `
 ./tag-tracker --ic -c -i -s http://<ip>:<port>/video
 `
+10. If you used the -c option in the previous step, when you run the program again, you can skip the calibration entirely and just get straight to the good part:  
+`
+./tag-tracker -s http://<ip>:<port>/video
+`
 
 # Planned improvements:
 - Print the actual marker coordinates to the console and/or the output frame itself.
