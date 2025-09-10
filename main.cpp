@@ -50,18 +50,18 @@ int main(int argc, char *argv[]) {
     ("wh", po::value<int>()->default_value(windowHeight), "Height of the image display windows.")
     ("dict,d", po::value<int>()->default_value(dict), std::format("ArUco dictionary to expect. These are the possible options:\n{}", dictsString()).c_str())
     ("length,l", po::value<double>()->default_value(markerLength), "Size of the marker in meters.")
-    ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool. \
-                                                                                                       The default value is overridden if the program detects a calibration file. \
-                                                                                                       If this is set explicitly, the calibration file is ignored even if it exists.")
-    ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool. \
-                                                                                                         The default value is overridden if the program detects a calibration file. \
-                                                                                                         If this is set explicitly, the calibration file is ignored even if it exists.")
-    ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile)->implicit_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc.\
-                                                                                                                       If this parameter is explicitly set and calibration is performed, it will be used as output file for the calibration values.")
+    ("cm", po::value<std::vector<double> >()->default_value(camMatrixArray, vec2str(camMatrixArray)), "Camera matrix generated through the camera calibration tool. "
+                                                                                                      "The default value is overridden if the program detects a calibration file. "
+                                                                                                      "If this is set explicitly, the calibration file is ignored even if it exists.")
+    ("dc", po::value<std::vector<double> >()->default_value(distCoeffsArray, vec2str(distCoeffsArray)), "Distortion coefficients generated through the camera calibration tool. "
+                                                                                                        "The default value is overridden if the program detects a calibration file. "
+                                                                                                        "If this is set explicitly, the calibration file is ignored even if it exists.")
+    ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile)->implicit_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc. "
+                                                                                                                      "If this parameter is explicitly set and calibration is performed, it will be used as output file for the calibration values.")
 #if CAMERA_CALIBRATION
-    ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, \
-                                                                                                                    calibration will be done with images matching the pattern. This overrides the cm and dc options. \
-                                                                                                                    This will be used as output folder (and file extension) instead if using interactive calibration.")
+    ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, "
+                                                                                                                   "calibration will be done with images matching the pattern. This overrides the cm and dc options. "
+                                                                                                                   "This will be used as output folder (and file extension) instead if using interactive calibration.")
     ("width,W", po::value<int>()->default_value(checkerboardWidth), "Number of inner corners horizontally (i.e. columns-1).")
     ("height,H", po::value<int>()->default_value(checkerboardHeight), "Number of inner corners vertically (i.e. rows-1).")
     ("ic", "Does interactive calibration before starting to track the markers. You will have to point the camera at the chessboard pattern from different positions. This overrides the cm and dc options.")
