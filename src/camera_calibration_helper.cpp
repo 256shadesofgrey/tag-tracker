@@ -108,9 +108,7 @@ void liveFeed(cv::VideoCapture& videoSource, cv::Mat& frame, bool& showFeed) {
 
     cv::imshow("Calibration Preview", frame);
 
-    if (cv::waitKey(1) >= 0) {
-      break;
-    }
+    cv::waitKey(1);
   }
 
   cv::destroyWindow("Calibration Preview");
