@@ -185,14 +185,10 @@ int CameraCalibrationHelper::calibrateInteractively(cv::VideoCapture& videoSourc
     return processedImgCount;
   }
 
-  if (!std::filesystem::exists(folder)) {
-    assert(std::filesystem::create_directory(folder));
-  }
-
   std::filesystem::path processedFolder = folder;
   processedFolder /= PROCESSED_IMAGE_SUBFOLDER;
   if (!std::filesystem::exists(processedFolder)) {
-    assert(std::filesystem::create_directory(processedFolder));
+    assert(std::filesystem::create_directories(processedFolder));
   }
 
   for (unsigned int i = 0; i < inputImages.size(); i++) {
