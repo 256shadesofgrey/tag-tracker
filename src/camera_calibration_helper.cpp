@@ -102,8 +102,8 @@ void liveFeed(cv::VideoCapture& videoSource, cv::Mat& frame, bool& showFeed) {
     lock.unlock();
 
     if (frame.empty()) {
-      std::cerr << "Error: Could not read frame." << std::endl;
-      break;
+      cv::waitKey(1);
+      continue;
     }
 
     cv::imshow("Calibration Preview", frame);
