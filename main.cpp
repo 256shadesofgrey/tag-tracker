@@ -11,11 +11,6 @@
 #include <tag-tracker.h>
 #include <camera_calibration_helper.h>
 
-// Set to 1 to enable built-in camera calibration features.
-#ifndef CAMERA_CALIBRATION
-#define CAMERA_CALIBRATION 1
-#endif
-
 namespace po = boost::program_options;
 
 int main(int argc, char *argv[]) {
@@ -31,14 +26,12 @@ int main(int argc, char *argv[]) {
   bool useCalFileCamMat = true;
   bool useCalFileDistCoeffs = true;
 
-#if CAMERA_CALIBRATION
   std::string path = "";
   int checkerboardWidth = 8;
   int checkerboardHeight = 5;
   bool interactiveCalibration = false;
   bool calibration = false;
   bool saveCalFile = false;
-#endif // CAMERA_CALIBRATION
 
   po::options_description desc("Available options", HELP_LINE_LENGTH, HELP_DESCRIPTION_LENGTH);
 
@@ -58,14 +51,12 @@ int main(int argc, char *argv[]) {
                                                                                                         "If this is set explicitly, the calibration file is ignored even if it exists.")
     ("calibration-file,c", po::value<std::string>()->default_value(calibrationFile)->implicit_value(calibrationFile), "The file to attempt to read calibration values from. If this file does not exist, and cm and dc are not set, use default values for cm and dc. "
                                                                                                                       "If this parameter is explicitly set and calibration is performed, it will be used as output file for the calibration values.")
-#if CAMERA_CALIBRATION
     ("calibration-images,i", po::value<std::string>()->default_value(path)->implicit_value("./calibration/*.jpg"), "Folder containing calibration images. If it is set, "
                                                                                                                    "calibration will be done with images matching the pattern. This overrides the cm and dc options. "
                                                                                                                    "This will be used as output folder (and file extension) instead if using interactive calibration.")
     ("width,W", po::value<int>()->default_value(checkerboardWidth), "Number of inner corners horizontally (i.e. columns-1).")
     ("height,H", po::value<int>()->default_value(checkerboardHeight), "Number of inner corners vertically (i.e. rows-1).")
     ("ic", "Does interactive calibration before starting to track the markers. You will have to point the camera at the chessboard pattern from different positions. This overrides the cm and dc options.")
-#endif // CAMERA_CALIBRATION
   ;
 
   po::variables_map vm;
@@ -183,7 +174,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-#if CAMERA_CALIBRATION
   if (vm.count("calibration-images")) {
     path = vm["calibration-images"].as<std::string>();
     calibration = true;
@@ -201,7 +191,6 @@ int main(int argc, char *argv[]) {
     calibration = true;
     interactiveCalibration = true;
   }
-#endif // CAMERA_CALIBRATION
 
   cv::VideoCapture cap(videoSource);
 
@@ -215,7 +204,6 @@ int main(int argc, char *argv[]) {
   cv::Mat camMatrix = cv::Mat(3, 3, CV_64F, camMatrixArray.data());
   cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F, distCoeffsArray.data());
 
-#if CAMERA_CALIBRATION
   if (calibration) {
     CameraCalibrationHelper cch(checkerboardWidth, checkerboardHeight);
 
@@ -233,7 +221,6 @@ int main(int argc, char *argv[]) {
       saveCalibrationFile(calibrationFile, camMatrix, distCoeffs);
     }
   }
-#endif // CAMERA_CALIBRATION
 
   cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
   cv::namedWindow("Marker Detect", cv::WINDOW_NORMAL);
