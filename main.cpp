@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
         camMatrixArray = calVals[0];
         distCoeffsArray = calVals[1];
 
-        if (verbosity > 1) {
+        if (verbosity > 2) {
           std::cout << "Camera matrix from file: " << vec2str(camMatrixArray) << std::endl;
           std::cout << "Distortion coefficients from file: " << vec2str(distCoeffsArray) << std::endl;
         }
@@ -176,7 +176,9 @@ int main(int argc, char *argv[]) {
 
   if (vm.count("calibration-images")) {
     path = vm["calibration-images"].as<std::string>();
-    calibration = true;
+    if (!vm["calibration-images"].defaulted()) {
+      calibration = true;
+    }
   }
 
   if (vm.count("width")) {
@@ -220,6 +222,11 @@ int main(int argc, char *argv[]) {
     if (saveCalFile) {
       saveCalibrationFile(calibrationFile, camMatrix, distCoeffs);
     }
+  }
+
+  if (verbosity > 1) {
+    std::cout << "Final camera matrix: " << vec2str(camMatrixArray) << std::endl;
+    std::cout << "Final distortion coefficients: " << vec2str(distCoeffsArray) << std::endl;
   }
 
   cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
