@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
   cv::Mat frameRaw, frameMarkers;
 
   // Vars for detection.
-  std::vector<int> markerIds = {0};
+  std::vector<int> markerIds = {};
   std::vector<std::vector<cv::Point2f> > markerCorners, rejectedCandidates;
   cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(dict);
@@ -275,12 +275,12 @@ int main(int argc, char *argv[]) {
     }
 
     // Draw pose estimation axes to the frame.
-    for(unsigned int i = 0; i < markerIds.size(); i++) {
+    for(unsigned int i = 0; i < nMarkers; i++) {
       cv::drawFrameAxes(frameMarkers, camMatrix, distCoeffs, rvecs[i], tvecs[i], markerLength * 0.7f, 2);
     }
 
     // Write marker position under the marker.
-    for (unsigned int i = 0; i < markerCorners.size(); i++) {
+    for (unsigned int i = 0; i < nMarkers; i++) {
       // Bottom left corner of the marker.
       cv::Point2f textStart = markerCorners.at(i).at(3);
       // Text reference point is bottom left, and we want it to be top left, so offset origin by font height.
