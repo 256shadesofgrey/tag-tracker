@@ -293,6 +293,15 @@ int main(int argc, char *argv[]) {
       cv::putText(frameMarkers, "Z: " + std::to_string(tvecs.at(i)[2]), textStart, cv::FONT_HERSHEY_SIMPLEX, TEXT_SCALE, BLUE, TEXT_LINE_THICKNESS, cv::LINE_AA);
     }
 
+    if (verbosity > 0) {
+      for(unsigned int i = 0; i < nMarkers; i++) {
+        std::cout << "Coordinates {x,y,z} of marker id=" << markerIds.at(i) << ": " << vec2str(tvecs.at(i));
+      }
+      if (nMarkers > 0) {
+        std::cout << std::endl;
+      }
+    }
+
     cv::imshow("Marker Detect", frameMarkers);
 
     // Wait for X milliseconds. If a key is pressed, break from the loop.
