@@ -54,8 +54,9 @@ static const std::map<const cv::aruco::PredefinedDictionaryType, const std::stri
 #define BLUE cv::Scalar(255, 0, 0)
 #define GREEN cv::Scalar(0, 255, 0)
 #define RED cv::Scalar(0, 0, 255)
-#define TEXT_SIZE (0.7)
+#define TEXT_SCALE (0.7)
 #define TEXT_LINE_THICKNESS (1)
+#define FONT_HEIGHT (26) // Adjust this only if you change font. Use TEXT_SCALE to adjust font size instead.
 
 inline std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;

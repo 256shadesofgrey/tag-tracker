@@ -283,9 +283,18 @@ int main(int argc, char *argv[]) {
       cv::drawFrameAxes(frameMarkers, camMatrix, distCoeffs, rvecs[i], tvecs[i], markerLength * 0.7f, 2);
     }
 
-    // Write marker position next to the marker.
+    // Write marker position under the marker.
     for (unsigned int i = 0; i < markerCorners.size(); i++) {
-      cv::putText(frameMarkers, vec2str(tvecs.at(i)), markerCorners.at(i).at(0), cv::FONT_HERSHEY_SIMPLEX, TEXT_SIZE, GREEN, TEXT_LINE_THICKNESS, cv::LINE_AA);
+      // Bottom left corner of the marker.
+      cv::Point2f textStart = markerCorners.at(i).at(3);
+      // Text reference point is bottom left, and we want it to be top left, so offset origin by font height.
+      textStart.y += TEXT_SCALE * FONT_HEIGHT;
+
+      cv::putText(frameMarkers, "X: " + std::to_string(tvecs.at(i)[0]), textStart, cv::FONT_HERSHEY_SIMPLEX, TEXT_SCALE, RED, TEXT_LINE_THICKNESS, cv::LINE_AA);
+      textStart.y += TEXT_SCALE * FONT_HEIGHT;
+      cv::putText(frameMarkers, "Y: " + std::to_string(tvecs.at(i)[1]), textStart, cv::FONT_HERSHEY_SIMPLEX, TEXT_SCALE, GREEN, TEXT_LINE_THICKNESS, cv::LINE_AA);
+      textStart.y += TEXT_SCALE * FONT_HEIGHT;
+      cv::putText(frameMarkers, "Z: " + std::to_string(tvecs.at(i)[2]), textStart, cv::FONT_HERSHEY_SIMPLEX, TEXT_SCALE, BLUE, TEXT_LINE_THICKNESS, cv::LINE_AA);
     }
 
     cv::imshow("Marker Detect", frameMarkers);
