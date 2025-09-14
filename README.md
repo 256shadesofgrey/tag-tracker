@@ -1,3 +1,7 @@
+# Description
+This program allows you to track an ArUco tag on a video stream and it displays its position relative to the camera. 
+You can also calibrate the camera you are using before you start tracking the tag.
+
 # Usage
 1. `git clone https://github.com/256shadesofgrey/tag-tracker.git`
 2. `cd tag-tracker`
@@ -20,5 +24,5 @@ If you want to save the calibration results to skip the calibration step in the 
 ./tag-tracker -s http://<ip>:<port>/video
 `
 
-# What it looks like
+# Screenshot
 ![Screenshot](preview/detected_marker.png)
