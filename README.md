@@ -20,5 +20,5 @@ If you want to save the calibration results to skip the calibration step in the 
 ./tag-tracker -s http://<ip>:<port>/video
 `
 
-# Planned improvements:
-- Print the actual marker coordinates to the console and/or the output frame itself.
+# What it looks like
+![Screenshot](preview/detected_marker.png)
