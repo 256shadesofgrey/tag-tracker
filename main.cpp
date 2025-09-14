@@ -265,7 +265,11 @@ int main(int argc, char *argv[]) {
     frameMarkers = frameRaw.clone();
     cv::aruco::drawDetectedMarkers(frameMarkers, markerCorners, markerIds);
 
-    // Estimate pose and draw the axes on the output frame.
+    for (unsigned int i = 0; i < markerCorners.size() && verbosity > 2; i++) {
+      std::cout << "Corners for marker id=" << markerIds.at(i) << ":\n" << markerCorners.at(i) << std::endl;
+    }
+
+    // Estimate pose.
     size_t nMarkers = markerCorners.size();
     std::vector<cv::Vec3d> rvecs(nMarkers), tvecs(nMarkers);
     if(!markerIds.empty()) {
@@ -277,6 +281,11 @@ int main(int argc, char *argv[]) {
     // Draw pose estimation axes to the frame.
     for(unsigned int i = 0; i < markerIds.size(); i++) {
       cv::drawFrameAxes(frameMarkers, camMatrix, distCoeffs, rvecs[i], tvecs[i], markerLength * 0.7f, 2);
+    }
+
+    // Write marker position next to the marker.
+    for (unsigned int i = 0; i < markerCorners.size(); i++) {
+      cv::putText(frameMarkers, vec2str(tvecs.at(i)), markerCorners.at(i).at(0), cv::FONT_HERSHEY_SIMPLEX, TEXT_SIZE, GREEN, TEXT_LINE_THICKNESS, cv::LINE_AA);
     }
 
     cv::imshow("Marker Detect", frameMarkers);

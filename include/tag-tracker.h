@@ -5,6 +5,7 @@
 #include <map>
 #include <filesystem>
 #include <fstream>
+#include <type_traits>
 #include <opencv2/aruco.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -50,6 +51,12 @@ static const std::map<const cv::aruco::PredefinedDictionaryType, const std::stri
 
 #define CLEAR_LINE_ESCAPE_SEQUENCE "\r\x1b[0;K" // Equivalent to go back to beginning of the line, and clear the line from cursor to EOL.
 
+#define BLUE cv::Scalar(255, 0, 0)
+#define GREEN cv::Scalar(0, 255, 0)
+#define RED cv::Scalar(0, 0, 255)
+#define TEXT_SIZE (0.7)
+#define TEXT_LINE_THICKNESS (1)
+
 inline std::string dictName(cv::aruco::PredefinedDictionaryType dict) {
   std::string ret;
   try{
@@ -72,10 +79,27 @@ inline std::string dictsString() {
   return dictStream.str();
 }
 
-template <typename T> inline std::string vec2str(std::vector<T> v) {
+template <typename T> concept ArithmeticTypeConcept = requires(T) {
+  std::is_arithmetic<T>::value;
+};
+
+template <ArithmeticTypeConcept T> inline std::string vec2str(std::vector<T> v) {
   std::string str = "{";
 
   for (unsigned int i = 0; i < v.size(); i++) {
+    if (i > 0) {
+      str += ",";
+    }
+    str += std::to_string(v[i]);
+  }
+
+  return str += "}";
+}
+
+inline std::string vec2str(cv::Vec3d v) {
+  std::string str = "{";
+
+  for (unsigned int i = 0; i < v.rows; i++) {
     if (i > 0) {
       str += ",";
     }
