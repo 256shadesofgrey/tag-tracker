@@ -229,10 +229,8 @@ int main(int argc, char *argv[]) {
     std::cout << "Final distortion coefficients: " << vec2str(distCoeffsArray) << std::endl;
   }
 
-  cv::namedWindow("Camera Feed", cv::WINDOW_NORMAL);
   cv::namedWindow("Marker Detect", cv::WINDOW_NORMAL);
   cv::waitKey(100);
-  cv::resizeWindow("Camera Feed", windowWidth, windowHeight);
   cv::resizeWindow("Marker Detect", windowWidth, windowHeight);
 
   cv::Mat frameRaw, frameMarkers;
@@ -257,8 +255,6 @@ int main(int argc, char *argv[]) {
       std::cerr << "Error: Could not read frame." << std::endl;
       break;
     }
-
-    cv::imshow("Camera Feed", frameRaw);
 
     // Detect markers and draw them on the output frame.
     detector.detectMarkers(frameRaw, markerCorners, markerIds, rejectedCandidates);
